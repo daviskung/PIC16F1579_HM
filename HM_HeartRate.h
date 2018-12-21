@@ -57,7 +57,9 @@
 #define		HM_ADC_CH_AN0	channel_AN6	
 #define		HM_ADC_CH_AN2	channel_AN5	
 #define 	AN0_SAMPLE_QUEUE_SIZE 	5
-#define 	AN2_SAMPLE_SIZE 		100
+#define 	AN2_SAMPLE_SIZE 		500 // for 4ms * 500 = 2000ms(too large)
+#define 	AN2_ARY_SAMPLE_SIZE 		100 // for 4ms per 5 times(20ms) * 100 = 2000ms
+
 #define 	AN2_SAMPLE_Inv4s_SIZE 		200
 
 #define 	AN2_SAMPLE_AVGBUF_SIZE 		8

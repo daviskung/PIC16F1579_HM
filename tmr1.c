@@ -56,13 +56,11 @@
 //SystemControlStatus_Event	ControlStatus_Event ; 
 //TXControlStatus_Event	TX_Status_Event ; 
 
-uint8_t 	Tmr1_10ms_cnt,Tmr1_sec_cnt;
+uint8_t 	Tmr1_4ms_cnt;
+uint16_t	Tmr1_sec_cnt;
 uint8_t 	Tmr1_upDate;
 
 bit bAN0_ADC_ON,bSendToBT_timer_Flag,bSendToBT_StartTimer_Flag ;
-
-//adc_result_t	AN2SampValue[AN2_SAMPLE_SIZE];
-
 
 /**
   Section: Global Variables Definitions
@@ -81,11 +79,11 @@ void TMR1_Initialize(void)
     //T1GSS T1G_pin; TMR1GE disabled; T1GTM disabled; T1GPOL low; T1GGO done; T1GSPM disabled; 
     T1GCON = 0x00;
 
-    //TMR1H 99; 
-    TMR1H = 0x63;
+    //TMR1H 193; 
+    TMR1H = 0xC1;
 
-    //TMR1L 192; 
-    TMR1L = 0xC0;
+    //TMR1L 128; 
+    TMR1L = 0x80;
 
     // Load the TMR value to reload variable
     timer1ReloadVal=(uint16_t)((TMR1H << 8) | TMR1L);
@@ -194,9 +192,9 @@ void TMR1_InterruptHandler_davis(void)
 {
 	
 	Tmr1_upDate=1;	
-	Tmr1_10ms_cnt++;
+	Tmr1_4ms_cnt++;
 	Tmr1_sec_cnt++;
-	if((Tmr1_sec_cnt > 200)&&(bSendToBT_StartTimer_Flag == TRUE)){ // per 2 sec
+	if((Tmr1_sec_cnt > 500)&&(bSendToBT_StartTimer_Flag == TRUE)){ // per 2 sec
 		bSendToBT_timer_Flag = TRUE;
 		Tmr1_sec_cnt = 0;
 	}

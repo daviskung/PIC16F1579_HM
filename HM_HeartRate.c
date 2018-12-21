@@ -18,7 +18,7 @@ uint16_t FindSetP_cnt;
 uint16_t FindSetP_TMR_cnt;
 uint8_t AN0_InRange_cnt;
 
-uint8_t an2SampleCnt;
+uint16_t an2SampleCnt;
 bit bAN2_GainContWaitFlag;
 bit bAN2_LowAmplitudeFlag;
 uint8_t AN2_GainContInRange_cnt;
