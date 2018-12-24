@@ -57,7 +57,7 @@ void SYSTEM_Initialize(void)
     TMR2_Initialize();
     TMR1_Initialize();
     TMR0_Initialize();
-    EUSART_Initialize();
+    EUSART_Initialize();	// BaudRate = 115,200	ErrRate is low
 }
 
 void OSCILLATOR_Initialize(void)

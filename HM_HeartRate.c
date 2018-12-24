@@ -26,7 +26,7 @@ uint8_t AGC_MCP4011_GainLimitSet,AN2_GainContOutOfRange_CycleCnt;
 
 uint8_t InRangeStatus,AN2_HRBufferIndex;
 
-uint8_t AN2_oldPulseCnt;
+uint16_t AN2_oldPulseCnt;
 
 uint8_t		PIC_HR_Msg_OUT[SEND_toRTL_HR_MSG_SIZE] = {0xff,'H', '=' ,'1','N','S','1','\n' , '\r'} ;
 

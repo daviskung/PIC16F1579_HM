@@ -56,11 +56,13 @@
 //SystemControlStatus_Event	ControlStatus_Event ; 
 //TXControlStatus_Event	TX_Status_Event ; 
 
-uint8_t 	Tmr1_4ms_cnt;
-uint16_t	Tmr1_sec_cnt;
+uint16_t 	Tmr1_4ms_cnt;
+uint16_t	Tmr1_2sec_cnt;
+uint16_t	Tmr1_1sec_cnt;
 uint8_t 	Tmr1_upDate;
 
 bit bAN0_ADC_ON,bSendToBT_timer_Flag,bSendToBT_StartTimer_Flag ;
+bit bTmr1_1sec_Flag;
 
 /**
   Section: Global Variables Definitions
@@ -193,10 +195,18 @@ void TMR1_InterruptHandler_davis(void)
 	
 	Tmr1_upDate=1;	
 	Tmr1_4ms_cnt++;
-	Tmr1_sec_cnt++;
-	if((Tmr1_sec_cnt > 500)&&(bSendToBT_StartTimer_Flag == TRUE)){ // per 2 sec
+	Tmr1_2sec_cnt++;
+	Tmr1_1sec_cnt++;
+
+	if(Tmr1_1sec_cnt > 250){ // per 1 sec
+		bTmr1_1sec_Flag = TRUE;
+		Tmr1_1sec_cnt = 0;
+	}
+
+	
+	if((Tmr1_2sec_cnt > 500)&&(bSendToBT_StartTimer_Flag == TRUE)){ // per 2 sec
 		bSendToBT_timer_Flag = TRUE;
-		Tmr1_sec_cnt = 0;
+		Tmr1_2sec_cnt = 0;
 	}
 	bAN0_ADC_ON = TRUE;
 

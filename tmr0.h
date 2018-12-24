@@ -272,6 +272,7 @@ extern void (*TMR0_InterruptHandler)(void);
     None
 */
 void TMR0_DefaultInterruptHandler(void);
+void TMR0_InterruptHandler_davis(void);
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 

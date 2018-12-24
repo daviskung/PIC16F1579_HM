@@ -65,7 +65,7 @@
 #define 	AN2_SAMPLE_AVGBUF_SIZE 		8
 #define 	AN2_PULSE_COUNT_SIZE 		10
 #define		AN2HR_BUF_SIZE				5
-#define		OVER_TH_LIMIT				4
+#define		OVER_TH_LIMIT				100
 
 #define		VAL_1MIN_MS			60000
 #define		VAL_2SEC_MS			2000
@@ -73,7 +73,7 @@
 #define		VAL_210_MAX_BPM		210		// 285ms
 
 #define		VAL_ERR_RANGE_PERCENT		20
-#define		VAL_NN_INTERVAL_DIFF		5	// 5 *20 = 100ms 
+#define		VAL_NN_INTERVAL_DIFF		100	// 100ms 
 // 每次心跳與心跳的間隔均有幾十毫秒以內的微小差異
 
 #define		V3P3_VALVE		1023	// 3.3V ADC

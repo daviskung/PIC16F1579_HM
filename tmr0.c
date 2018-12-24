@@ -56,6 +56,10 @@
 */
 
 volatile uint8_t timer0ReloadVal;
+
+uint16_t 	Tmr0_1ms_cnt;
+
+
 void (*TMR0_InterruptHandler)(void);
 /**
   Section: TMR0 APIs
@@ -81,7 +85,7 @@ void TMR0_Initialize(void)
     INTCONbits.TMR0IE = 1;
 
     // Set Default Interrupt Handler
-    TMR0_SetInterruptHandler(TMR0_DefaultInterruptHandler);
+    TMR0_SetInterruptHandler(TMR0_InterruptHandler_davis);
 }
 
 uint8_t TMR0_ReadTimer(void)
@@ -130,6 +134,16 @@ void TMR0_DefaultInterruptHandler(void){
     // add your TMR0 interrupt custom code
     // or set custom function using TMR0_SetInterruptHandler()
 }
+
+
+void TMR0_InterruptHandler_davis(void)
+{
+	
+	Tmr0_1ms_cnt++;
+	
+
+}
+
 
 /**
   End of File
