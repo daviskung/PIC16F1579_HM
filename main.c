@@ -5,6 +5,8 @@
 //		AN2SampValue[AN2_ARY_SAMPLE_SIZE] only sample per 5*4ms
 //	2018.12.24	CheckValResonable() / OVER_TH_LIMIT=100
 //		AN2 avg 5 time(AN2_AVG_5_CHK_BUF_FUN)
+//	2018.12.25	HR_BPMvalue_NotGood to check Heart Rate out of range
+//				set NSTROBE_LOW_EndSet = 0 error
 //
 //*****************************************************************
 
@@ -13,6 +15,7 @@
 
 #define		KEY_IN_FUN	0
 #define		AN2_AVG_5_CHK_BUF_FUN		1
+#define		HR_NOT_GOOD_VALUE_FUN		0
 
 
 #define		SEND_toRTL_CMD_ackSIZE	7
@@ -114,7 +117,7 @@ extern uint8_t AN2_GainContInRange_cnt;
 uint16_t AN2_PulseIntervalAvg,AN2_READ_PulseIntervalAvg_1msCnt; // AN2_READ_PulseIntervalAvg
 uint16_t AN2_tmpPulseCnt, AN2_OverThreshold_cnt;
 
-uint16_t HR_BPMvalue,HR_BPMvalue_1msCnt;
+uint16_t HR_BPMvalue_NotGood,HR_BPMvalue_1msCnt;
 extern uint8_t InRangeStatus,AN2_HRBufferIndex;
 extern uint16_t AN2_oldPulseCnt;
 
@@ -122,7 +125,7 @@ extern uint16_t Tmr0_1ms_cnt;
 
 
 uint16_t AN2_HRBuffer[AN2HR_BUF_SIZE];
-//uint8_t AN2_HR_CntBuffer[AN2HR_BUF_SIZE-1];
+
 
 bit bGet_InitValToCopmpare,bGet_MinVal_InCycleTime;
 
@@ -361,8 +364,9 @@ void main(void)
 	            RxBuffer[ cnt ] = rxData ;			
 				cnt++;
 			}while(eusartRxCount>0);
-
-			if(( RxBuffer[ 3 ] == '\n' ) && ( RxBuffer[ 4 ] == '\r' )){
+			
+			if(( RxBuffer[ 3 ] == '\n' ) && ( RxBuffer[ 4 ] == '\r' )){ // for RTL NOT test
+			//if(( RxBuffer[ 3 ] == '\r' ) && ( RxBuffer[ 4 ] == '\n' )){ // for RealTerm test only
 				ControlStatus_Event = RTLCmdCheck(RxBuffer[ 0 ],RxBuffer[ 1 ],RxBuffer[ 2 ]);
 				ControlStatus_change = 1;
 			}
@@ -501,7 +505,7 @@ void main(void)
 							// ADC AN2 avg
 							//-------------
 							
-							IO_RC7_SetHigh(); // S4 key
+							//IO_RC7_SetHigh(); // S4 key
 							
 							for (i = 0; i < AN2_SAMPLE_AVGBUF_SIZE; ++i)
 							{
@@ -515,7 +519,7 @@ void main(void)
 								AN2_SampAvgBuf_Value = AN2_SampAvgBuf_Value + AN2SampAvgBufValue[i] ;	
 							}
 							
-							IO_RC7_SetLow(); // S4 key
+							//IO_RC7_SetLow(); // S4 key
 							
 							AN2_SampAvgBuf_Value = AN2_SampAvgBuf_Value/AN2_SAMPLE_AVGBUF_SIZE;
 							AN2_ChkValue = AN2_SampAvgBuf_Value;
@@ -625,17 +629,24 @@ void main(void)
 					//HR_BPMvalue = VAL_1MIN_MS/(AN2_READ_PulseIntervalAvg*4); // sample rate 4ms
 					HR_BPMvalue_1msCnt = VAL_1MIN_MS/(AN2_READ_PulseIntervalAvg_1msCnt); // sample rate 4ms
 				if(bAN0_InRange == TRUE){
-				#if 0
-					DugHRMsg(HexNumTable[bAN2_GainContInRange],
-					HexNumTable[HR_BPMvalue/100],HexNumTable[(HR_BPMvalue/10)%10],HexNumTable[HR_BPMvalue%10] );
 
-					DugHRMsg('T','1','m','s' );
-				#endif
-				
-					DugHRMsg(HexNumTable[bAN2_GainContInRange],
-					HexNumTable[HR_BPMvalue_1msCnt/100],HexNumTable[(HR_BPMvalue_1msCnt/10)%10],HexNumTable[HR_BPMvalue_1msCnt%10] );
+					if((HR_BPMvalue_1msCnt < 40 ) || (HR_BPMvalue_1msCnt > 210)){
+						HR_BPMvalue_NotGood++;
+						if (HR_BPMvalue_NotGood > 30)						
+							DugHRMsg('3' ,
+							HexNumTable[HR_BPMvalue_1msCnt/100],HexNumTable[(HR_BPMvalue_1msCnt/10)%10],HexNumTable[HR_BPMvalue_1msCnt%10] );
+						else
+							DugHRMsg(HexNumTable[bAN2_GainContInRange],
+							HexNumTable[HR_BPMvalue_1msCnt/100],HexNumTable[(HR_BPMvalue_1msCnt/10)%10],HexNumTable[HR_BPMvalue_1msCnt%10] );
+					}	
+					else{ 
+						HR_BPMvalue_NotGood = 0;			
+						DugHRMsg(HexNumTable[bAN2_GainContInRange],
+						HexNumTable[HR_BPMvalue_1msCnt/100],HexNumTable[(HR_BPMvalue_1msCnt/10)%10],HexNumTable[HR_BPMvalue_1msCnt%10] );
+					}
 				}
 				else DugHRMsg('2','0','0','0' );
+				
 				bSendToBT_timer_Flag = FALSE;
 			}
 		}

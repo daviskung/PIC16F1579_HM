@@ -1,3 +1,7 @@
+//*************************************************************
+//	2018.12.25	set NSTROBE_LOW_EndSet = 0 error
+//*************************************************************
+
 #include "HM_HeartRate.h"
 
 #define		SEND_toRTL_HR_MSG_SIZE	9
@@ -236,7 +240,7 @@ void FindSetPoint(uint16_t AN0Value) // run per 20ms*5 = 100ms
 			
 			case AN0_OVER_RANGE_Event:
 				NSTROBE_Rset = 0;
-				NSTROBE_LOW_EndSet = 0;
+				NSTROBE_LOW_EndSet = 1;
 				bADC_AN0_Delay = TRUE;
 			
 				bAN0_InRange = FALSE;
@@ -249,7 +253,7 @@ void FindSetPoint(uint16_t AN0Value) // run per 20ms*5 = 100ms
 			case AN0_UNDER_RANGE_Event: 
 				NSTROBE_LOW_EndSet++;
 				if( NSTROBE_LOW_EndSet > 9 ){
-					NSTROBE_LOW_EndSet=0;
+					NSTROBE_LOW_EndSet=1;
 					NSTROBE_Rset++;
 					if( NSTROBE_Rset > 3 ) NSTROBE_Rset = 1;
 				}
