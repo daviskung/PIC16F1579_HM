@@ -7,6 +7,8 @@
 //		AN2 avg 5 time(AN2_AVG_5_CHK_BUF_FUN)
 //	2018.12.25	HR_BPMvalue_NotGood to check Heart Rate out of range
 //				set NSTROBE_LOW_EndSet = 0 error
+//	2018.12.27	add "AGC_MCP4011_Gain"" send RTL
+//	2018.12.28	UART msg Ending = /r /n
 //
 //*****************************************************************
 
@@ -18,8 +20,8 @@
 #define		HR_NOT_GOOD_VALUE_FUN		0
 
 
-#define		SEND_toRTL_CMD_ackSIZE	7
-#define		SEND_toRTL_CMD_SIZE		6
+#define		SEND_toRTL_CMD_ackSIZE	6
+#define		SEND_toRTL_CMD_SIZE		5
 #define		RxBuffer_SIZE			8
 
 #define		RTL_PWR_ON				0
@@ -31,19 +33,12 @@
 #define		GO_UP		1
 #define		GO_DOWN		0
 
+const uint8_t	PIC_cmd_pwrON[SEND_toRTL_CMD_SIZE] = { 'B', 'O' , 'P' , '\r' , '\n'} ;
+const uint8_t	PIC_cmd_Error[SEND_toRTL_CMD_SIZE] = { 'E', 'R' , 'R' , '\r' , '\n'} ;
 
-uint8_t	PIC_AR_VAL[SEND_toRTL_CMD_SIZE] = { 0xff,'A', 'R' , 'G' , '\n' , '\r'} ;
-
-
-
-
-
-const uint8_t	PIC_cmd_pwrON[SEND_toRTL_CMD_SIZE] = { 0xff,'B', 'O' , 'P' , '\n' , '\r'} ;
-const uint8_t	PIC_cmd_Error[SEND_toRTL_CMD_SIZE] = { 0xff,'E', 'R' , 'R' , '\n' , '\r'} ;
-
-const uint8_t RTL_pwrON_ack[SEND_toRTL_CMD_ackSIZE] = { 0xff,'R', 'T' , 'L' , 'A', '\n' , '\r'} ;
-const uint8_t RTL_HWEnable_ack[SEND_toRTL_CMD_ackSIZE] = { 0xff,'E', 'N' , 'B' , 'A', '\n' , '\r'} ;
-const uint8_t RTL_HWStop_ack[SEND_toRTL_CMD_ackSIZE] = { 0xff,'S', 'T' , 'P' , 'A', '\n' , '\r'} ;
+const uint8_t RTL_pwrON_ack[SEND_toRTL_CMD_ackSIZE] = { 'R', 'T' , 'L' , 'A', '\r' , '\n'} ;
+const uint8_t RTL_HWEnable_ack[SEND_toRTL_CMD_ackSIZE] = { 'E', 'N' , 'B' , 'A', '\r' , '\n'} ;
+const uint8_t RTL_HWStop_ack[SEND_toRTL_CMD_ackSIZE] = { 'S', 'T' , 'P' , 'A', '\r' , '\n'} ;
 
 
 extern uint16_t	Tmr1_4ms_cnt;
@@ -337,7 +332,7 @@ void main(void)
 	DugCmdMsg('V','1','2'); // version number month is 
 
 	
-	DugCmdMsg('2','4','c'); // version number day is 
+	DugCmdMsg('2','8','a'); // version number day is 
 	
     TMR1_StartTimer();	// start 50ms counter
     
@@ -550,11 +545,10 @@ void main(void)
 									
 									AGC_MCP4011_Dir = GO_DOWN;
 									MCP_setVal(AGC_MCP4011_Dir);
-									
-								
+							#if AGC_MCP4011_DUG_MSG_FUN 
 									if(AGC_MCP4011_Gain)
 										DugCmdMsg('D',HexNumTable[AGC_MCP4011_Gain/10],HexNumTable[AGC_MCP4011_Gain%10] );
-								
+							#endif	
 									bAN2_GainContWaitFlag = WAIT;
 									bAN2_GainContInRange = FALSE;
 									//AN2_HRBufferIndex = 0;
@@ -565,7 +559,10 @@ void main(void)
 									AN2_GainContInRange_cnt--;
 									if (AN2_GainContInRange_cnt < 0) AN2_GainContInRange_cnt = 0;
 								}
+							
+							#if AGC_MCP4011_DUG_MSG_FUN 
 								DugDataMsg('o','v','R',AN2_ChkValue) ; 
+							#endif
 							}
 								
 							if( AN2MinValue > AN2_ChkValue)		AN2MinValue = AN2_ChkValue;
@@ -584,14 +581,17 @@ void main(void)
 									AGC_MCP4011_Dir = GO_UP;
 									MCP_setVal(AGC_MCP4011_Dir);
 								
+							#if AGC_MCP4011_DUG_MSG_FUN	
 									if(AGC_MCP4011_Gain)
 											DugCmdMsg('U',HexNumTable[AGC_MCP4011_Gain/10],HexNumTable[AGC_MCP4011_Gain%10] );
-								
+							#endif	
 									bAN2_GainContWaitFlag = WAIT;
 									AN2_GainContInRange_cnt = 0;
 									bAN2_GainContInRange = FALSE;
 									//AN2_HRBufferIndex = 0;
+							#if AGC_MCP4011_DUG_MSG_FUN 
 									DugDataMsg('L','a','R',(AN2MaxValue - AN2MinValue)) ; 
+							#endif
 								}
 								else{
 									
@@ -630,22 +630,12 @@ void main(void)
 					HR_BPMvalue_1msCnt = VAL_1MIN_MS/(AN2_READ_PulseIntervalAvg_1msCnt); // sample rate 4ms
 				if(bAN0_InRange == TRUE){
 
-					if((HR_BPMvalue_1msCnt < 40 ) || (HR_BPMvalue_1msCnt > 210)){
-						HR_BPMvalue_NotGood++;
-						if (HR_BPMvalue_NotGood > 30)						
-							DugHRMsg('3' ,
-							HexNumTable[HR_BPMvalue_1msCnt/100],HexNumTable[(HR_BPMvalue_1msCnt/10)%10],HexNumTable[HR_BPMvalue_1msCnt%10] );
-						else
-							DugHRMsg(HexNumTable[bAN2_GainContInRange],
-							HexNumTable[HR_BPMvalue_1msCnt/100],HexNumTable[(HR_BPMvalue_1msCnt/10)%10],HexNumTable[HR_BPMvalue_1msCnt%10] );
-					}	
-					else{ 
-						HR_BPMvalue_NotGood = 0;			
-						DugHRMsg(HexNumTable[bAN2_GainContInRange],
-						HexNumTable[HR_BPMvalue_1msCnt/100],HexNumTable[(HR_BPMvalue_1msCnt/10)%10],HexNumTable[HR_BPMvalue_1msCnt%10] );
-					}
+					DugHRMsg(HexNumTable[bAN2_GainContInRange],HexNumTable[AGC_MCP4011_Gain/10],HexNumTable[AGC_MCP4011_Gain%10],
+						HexNumTable[HR_BPMvalue_1msCnt/100],HexNumTable[(HR_BPMvalue_1msCnt/10)%10],HexNumTable[HR_BPMvalue_1msCnt%10] );	
 				}
-				else DugHRMsg('2','0','0','0' );
+				else{ 
+					DugHRMsg('2',HexNumTable[AGC_MCP4011_Gain/10],HexNumTable[AGC_MCP4011_Gain%10],'0','0','0' );
+				}
 				
 				bSendToBT_timer_Flag = FALSE;
 			}
