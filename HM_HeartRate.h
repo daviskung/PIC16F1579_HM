@@ -6,6 +6,7 @@
 
 #define		HEART_RATE_DUG_MSG_FUN	0
 #define		STOP_DUG_MSG_FUN	0
+#define		AGC_MCP4011_DUG_MSG_FUN	1
 
 
 #define	NS1_PIN		IO_RB4_LAT	//LATB4
@@ -99,7 +100,7 @@
 
 
 uint8_t		PIC_DUG_cmd_OUT[SEND_toRTL_DUG_CMD_SIZE] = { 0xff,'D', 'U' , 'G' , '=' ,'N','S','1'
-			,'\n' , '\r'} ;
+			,'\r' , '\n'} ; // PIC do not know this \n \r
 
 
 void FindSetPoint(uint16_t AN0Value);
@@ -116,7 +117,7 @@ void GainUp (void);
 void GainDown (void);
 void DugDataMsg(uint8_t DugCma,uint8_t DugCm0,uint8_t DugCm1,uint16_t DugCm2);
 void DugCmdMsg(uint8_t DugCm0,uint8_t DugCm1,uint8_t DugCm2);
-void DugHRMsg(uint8_t DugCmA,uint8_t DugCm0,uint8_t DugCm1,uint8_t DugCm2);
+void DugHRMsg(uint8_t DugCmA,uint8_t GainV10,uint8_t GainV1,uint8_t DugCm0,uint8_t DugCm1,uint8_t DugCm2);
 
 
 

@@ -4,7 +4,7 @@
 
 #include "HM_HeartRate.h"
 
-#define		SEND_toRTL_HR_MSG_SIZE	9
+#define		SEND_toRTL_HR_MSG_SIZE	11
 
 
 uint8_t NSTROBE_PWM_cnt;
@@ -32,7 +32,8 @@ uint8_t InRangeStatus,AN2_HRBufferIndex;
 
 uint16_t AN2_oldPulseCnt;
 
-uint8_t		PIC_HR_Msg_OUT[SEND_toRTL_HR_MSG_SIZE] = {0xff,'H', '=' ,'1','N','S','1','\n' , '\r'} ;
+//uint8_t		PIC_HR_Msg_OUT[SEND_toRTL_HR_MSG_SIZE] = {0xff,'H', '=' ,'1','N','S','1','\n' , '\r'} ;
+uint8_t		PIC_HR_Msg_OUT[SEND_toRTL_HR_MSG_SIZE] = {'H', '0' ,'=','G','V','-','N','S','1','\r' , '\n'} ;
 
 /*******************************************************************************
  * Fiddle with the gain pot functions
@@ -170,15 +171,18 @@ void StopRunHW(void)
 }
 
 
-void DugHRMsg(uint8_t DugCmA,uint8_t DugCm0,uint8_t DugCm1,uint8_t DugCm2)
+void DugHRMsg(uint8_t DugCmA,uint8_t GainV10,uint8_t GainV1,uint8_t DugCm0,uint8_t DugCm1,uint8_t DugCm2)
 {
 					
-	PIC_HR_Msg_OUT[1] = 'H';
-	PIC_HR_Msg_OUT[2] = DugCmA;
-	PIC_HR_Msg_OUT[3] = '=';
-	PIC_HR_Msg_OUT[4] = DugCm0;
-	PIC_HR_Msg_OUT[5] = DugCm1;
-	PIC_HR_Msg_OUT[6] = DugCm2;
+	PIC_HR_Msg_OUT[0] = 'H';
+	PIC_HR_Msg_OUT[1] = DugCmA;
+	PIC_HR_Msg_OUT[2] = '=';
+	PIC_HR_Msg_OUT[3] = GainV10;
+	PIC_HR_Msg_OUT[4] = GainV1;
+	PIC_HR_Msg_OUT[5] = '-';
+	PIC_HR_Msg_OUT[6] = DugCm0;
+	PIC_HR_Msg_OUT[7] = DugCm1;
+	PIC_HR_Msg_OUT[8] = DugCm2;
 	for( int i=0; i < SEND_toRTL_HR_MSG_SIZE ;i++)
 		EUSART_Write( PIC_HR_Msg_OUT[i] );
 }
