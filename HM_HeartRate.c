@@ -297,7 +297,9 @@ void FindSetPoint(uint16_t AN0Value) // run per 20ms*5 = 100ms
 
 		if( AGC_MCP4011_Gain != MIDGAIN ){
 			InitGain(MIDGAIN);
+	#if AGC_MCP4011_DUG_MSG_FUN 
 			DugDataMsg('M','C','P',0x32) ; 
+	#endif
 		}
 		
 	#if HEART_RATE_DUG_MSG_FUN

@@ -6,7 +6,7 @@
 
 #define		HEART_RATE_DUG_MSG_FUN	0
 #define		STOP_DUG_MSG_FUN	0
-#define		AGC_MCP4011_DUG_MSG_FUN	1
+#define		AGC_MCP4011_DUG_MSG_FUN	0
 
 
 #define	NS1_PIN		IO_RB4_LAT	//LATB4

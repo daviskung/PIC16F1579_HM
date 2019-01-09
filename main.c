@@ -9,6 +9,7 @@
 //				set NSTROBE_LOW_EndSet = 0 error
 //	2018.12.27	add "AGC_MCP4011_Gain"" send RTL
 //	2018.12.28	UART msg Ending = /r /n
+//	2019.01.09	Disable Debug Message(AGC_MCP4011_DUG_MSG_FUN)
 //
 //*****************************************************************
 
@@ -329,10 +330,10 @@ void main(void)
 	IO_RA2_SetDigitalOutput(); 	//S3_PIN
 	IO_RC7_SetDigitalOutput();	//S4_PIN
 	
-	DugCmdMsg('V','1','2'); // version number month is 
+	DugCmdMsg('V','0','1'); // version number month is 
 
 	
-	DugCmdMsg('2','8','a'); // version number day is 
+	DugCmdMsg('0','9','a'); // version number day is 
 	
     TMR1_StartTimer();	// start 50ms counter
     
