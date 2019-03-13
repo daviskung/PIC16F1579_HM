@@ -17,9 +17,10 @@ bit bAN0_ADC_DugOn;
 bit bADC_AN0_Delay ;
 bit bAN0_InRange;
 
-
-uint16_t FindSetP_cnt;
-uint16_t FindSetP_TMR_cnt;
+// 取消 看 AN0_IN_RANGE_Event 時間 , 直接看 AN0Value 極小時
+// 直接 reset AGC_MCP4011_Gain ->  InitGain(MIDGAIN);
+//uint16_t FindSetP_cnt; 
+//uint16_t FindSetP_TMR_cnt;
 uint8_t AN0_InRange_cnt;
 
 uint16_t an2SampleCnt;
@@ -149,8 +150,8 @@ void initialHWset(void)
 	NSTROBE_PWM_cnt = 0;
 	NSTROBE_Rset = 2;
 	NSTROBE_LOW_EndSet = 5;
-	FindSetP_cnt = 0;
-	FindSetP_TMR_cnt =0;
+	//FindSetP_cnt = 0;
+	//FindSetP_TMR_cnt =0;
 	AN0_InRange_cnt = 0;
 	
     ADCON0 = ADCON0_ADC_ENABLE; //  ADON Enabled
@@ -223,7 +224,7 @@ void FindSetPoint(uint16_t AN0Value) // run per 20ms*5 = 100ms
 
 	AN0ControlStatus_Event AN0_SetPointStatus,tmpAN0_SetPointStatus;
 
-	FindSetP_TMR_cnt++;
+	//FindSetP_TMR_cnt++;
 	//
 	// Enlarge AN0 range to reduce DeadZone range
 	//
@@ -237,7 +238,7 @@ void FindSetPoint(uint16_t AN0Value) // run per 20ms*5 = 100ms
 	{
 			case AN0_IN_RANGE_Event: 
 				if( bAN0_ADC_DugOn == TRUE ) DugDataMsg('A','m','I',AN0Value) ; 
-				FindSetP_cnt ++;
+				//FindSetP_cnt ++;
 				if( AN0_InRange_cnt < 15 ) AN0_InRange_cnt++;
 				
         			break; 
@@ -269,6 +270,14 @@ void FindSetPoint(uint16_t AN0Value) // run per 20ms*5 = 100ms
 				an2SampleCnt = 0;
 				
 				if( bAN0_ADC_DugOn == TRUE ) DugDataMsg('A','m','U',AN0Value) ; 
+				
+				if(( AGC_MCP4011_Gain != MIDGAIN ) &&( AN0Value <= V0min_VALVE )) {
+						InitGain(MIDGAIN);
+				#if AGC_MCP4011_DUG_MSG_FUN 
+						DugDataMsg('M','C','P',0x32) ; 
+				#endif
+				}
+				
         			break;
 					
 			default:
@@ -288,24 +297,9 @@ void FindSetPoint(uint16_t AN0Value) // run per 20ms*5 = 100ms
 		AN2_oldPulseCnt = 0;
 		AN0_InRange_cnt = 16;
 	}
-	if(FindSetP_TMR_cnt == 0) FindSetP_cnt = 0; // reset counter
+	
 
-	if( (FindSetP_TMR_cnt - FindSetP_cnt) > 20) {	 // over 20*100ms 2sec exit DEAD loop
-		
-		FindSetP_cnt = 0;
-		FindSetP_TMR_cnt = 0;
-
-		if( AGC_MCP4011_Gain != MIDGAIN ){
-			InitGain(MIDGAIN);
-	#if AGC_MCP4011_DUG_MSG_FUN 
-			DugDataMsg('M','C','P',0x32) ; 
-	#endif
-		}
-		
-	#if HEART_RATE_DUG_MSG_FUN
-		DugCmdMsg('O','U','T');
-	#endif
-	}
+	
 	
 	if( bAN0_ADC_DugOn == TRUE ) DugDataMsg('A','N','0',AN0Value) ; 
 }

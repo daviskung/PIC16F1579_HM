@@ -10,14 +10,15 @@
 //	2018.12.27	add "AGC_MCP4011_Gain"" send RTL
 //	2018.12.28	UART msg Ending = /r /n
 //	2019.01.09	Disable Debug Message(AGC_MCP4011_DUG_MSG_FUN)
-//
+//	2019.02.25	Send [inter-beat interval (IBI)] OR [R-R interval] in Hex format
+//	2019.03.12	In [case AN0_UNDER_RANGE_Event:] reset AGC_MCP4011_Gain to MIDGAIN=32
 //*****************************************************************
 
 #include "mcc_generated_files/mcc.h"
 #include "mcc_generated_files/HM_HeartRate.h"
 
 #define		KEY_IN_FUN	0
-#define		AN2_AVG_5_CHK_BUF_FUN		1
+#define		AN2_AVG_5_CHK_BUF_FUN		0
 #define		HR_NOT_GOOD_VALUE_FUN		0
 
 
@@ -178,7 +179,7 @@ void Cal_HeartRate(void)
 		AN2_tmpPulseCnt = Tmr0_1ms_cnt;
 				
 		// first one always GOOD 
-		if(AN2_oldPulseCnt != 0) CheckValResonable();
+		//if(AN2_oldPulseCnt != 0) CheckValResonable();
 				
 	#if AN2_AVG_5_CHK_BUF_FUN
 	
@@ -209,8 +210,8 @@ void Cal_HeartRate(void)
 			AN2_oldPulseCnt = AN2_READ_PulseIntervalAvg_1msCnt;
 #endif
 			
-			//AN2_oldPulseCnt = AN2_tmpPulseCnt; // 直接計算不調整
-			//AN2_READ_PulseIntervalAvg_1msCnt = AN2_tmpPulseCnt; // Tmr0 counter
+			AN2_oldPulseCnt = AN2_tmpPulseCnt; // 直接計算不調整
+			AN2_READ_PulseIntervalAvg_1msCnt = AN2_tmpPulseCnt; // Tmr0 counter
 			bGet_InitValToCopmpare	= FALSE;
 		}
 		
@@ -330,10 +331,10 @@ void main(void)
 	IO_RA2_SetDigitalOutput(); 	//S3_PIN
 	IO_RC7_SetDigitalOutput();	//S4_PIN
 	
-	DugCmdMsg('V','0','1'); // version number month is 
+	DugCmdMsg('V','0','3'); // version number month is 
 
 	
-	DugCmdMsg('0','9','a'); // version number day is 
+	DugCmdMsg('1','2','a'); // version number day is 
 	
     TMR1_StartTimer();	// start 50ms counter
     
@@ -626,13 +627,16 @@ void main(void)
 			if( bSendToBT_timer_Flag == TRUE){
 				HR_BPMvalue_1msCnt = 0;
 				if(AN2_READ_PulseIntervalAvg_1msCnt != 0)
-					//HR_BPMvalue = VAL_1MIN_MS/(AN2_READ_PulseIntervalAvg*20); // sample rate 20ms	
-					//HR_BPMvalue = VAL_1MIN_MS/(AN2_READ_PulseIntervalAvg*4); // sample rate 4ms
-					HR_BPMvalue_1msCnt = VAL_1MIN_MS/(AN2_READ_PulseIntervalAvg_1msCnt); // sample rate 4ms
+					
+					// 2019.02.25 Send [inter-beat interval (IBI)]
+					//HR_BPMvalue_1msCnt = VAL_1MIN_MS/(AN2_READ_PulseIntervalAvg_1msCnt); // sample rate 4ms
+					HR_BPMvalue_1msCnt = AN2_READ_PulseIntervalAvg_1msCnt; // 0xFFFF 資料格式 傳送
 				if(bAN0_InRange == TRUE){
 
 					DugHRMsg(HexNumTable[bAN2_GainContInRange],HexNumTable[AGC_MCP4011_Gain/10],HexNumTable[AGC_MCP4011_Gain%10],
-						HexNumTable[HR_BPMvalue_1msCnt/100],HexNumTable[(HR_BPMvalue_1msCnt/10)%10],HexNumTable[HR_BPMvalue_1msCnt%10] );	
+						HexNumTable[(HR_BPMvalue_1msCnt & 0xF00)>>8 ],HexNumTable[(HR_BPMvalue_1msCnt & 0xF0 )>>4],HexNumTable[(HR_BPMvalue_1msCnt & 0x0F)] );	
+						
+					//HexNumTable[3],HexNumTable[5],HexNumTable[9] );	 test OK
 				}
 				else{ 
 					DugHRMsg('2',HexNumTable[AGC_MCP4011_Gain/10],HexNumTable[AGC_MCP4011_Gain%10],'0','0','0' );

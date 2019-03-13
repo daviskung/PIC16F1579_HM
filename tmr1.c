@@ -204,7 +204,10 @@ void TMR1_InterruptHandler_davis(void)
 	}
 
 	
-	if((Tmr1_2sec_cnt > 500)&&(bSendToBT_StartTimer_Flag == TRUE)){ // per 2 sec
+	//if((Tmr1_2sec_cnt > 500)&&(bSendToBT_StartTimer_Flag == TRUE)){ // per 2 sec
+	if((Tmr1_2sec_cnt > 125)&&(bSendToBT_StartTimer_Flag == TRUE)){ // per 500 msec
+	//if((Tmr1_2sec_cnt > 250)&&(bSendToBT_StartTimer_Flag == TRUE)){ // per 1000 msec
+	//if((Tmr1_2sec_cnt > 200)&&(bSendToBT_StartTimer_Flag == TRUE)){ // per 800 msec
 		bSendToBT_timer_Flag = TRUE;
 		Tmr1_2sec_cnt = 0;
 	}
