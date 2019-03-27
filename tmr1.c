@@ -203,7 +203,11 @@ void TMR1_InterruptHandler_davis(void)
 		Tmr1_1sec_cnt = 0;
 	}
 
+	//	 Date:  Thu, 21 Mar 2019  
+	//	send the one data point when you collect an IBI.
+	//
 	
+	/*
 	//if((Tmr1_2sec_cnt > 500)&&(bSendToBT_StartTimer_Flag == TRUE)){ // per 2 sec
 	if((Tmr1_2sec_cnt > 125)&&(bSendToBT_StartTimer_Flag == TRUE)){ // per 500 msec
 	//if((Tmr1_2sec_cnt > 250)&&(bSendToBT_StartTimer_Flag == TRUE)){ // per 1000 msec
@@ -211,6 +215,8 @@ void TMR1_InterruptHandler_davis(void)
 		bSendToBT_timer_Flag = TRUE;
 		Tmr1_2sec_cnt = 0;
 	}
+	*/
+	
 	bAN0_ADC_ON = TRUE;
 
 }

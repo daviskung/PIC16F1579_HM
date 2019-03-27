@@ -12,6 +12,8 @@
 //	2019.01.09	Disable Debug Message(AGC_MCP4011_DUG_MSG_FUN)
 //	2019.02.25	Send [inter-beat interval (IBI)] OR [R-R interval] in Hex format
 //	2019.03.12	In [case AN0_UNDER_RANGE_Event:] reset AGC_MCP4011_Gain to MIDGAIN=32
+//	2019.03.22	mail: Date:  Thu, 21 Mar 2019 send the one data point when you collect an IBI.
+//				2019.03.27 test ok
 //*****************************************************************
 
 #include "mcc_generated_files/mcc.h"
@@ -212,6 +214,7 @@ void Cal_HeartRate(void)
 			
 			AN2_oldPulseCnt = AN2_tmpPulseCnt; // 直接計算不調整
 			AN2_READ_PulseIntervalAvg_1msCnt = AN2_tmpPulseCnt; // Tmr0 counter
+			bSendToBT_timer_Flag = TRUE;
 			bGet_InitValToCopmpare	= FALSE;
 		}
 		
@@ -334,7 +337,7 @@ void main(void)
 	DugCmdMsg('V','0','3'); // version number month is 
 
 	
-	DugCmdMsg('1','2','a'); // version number day is 
+	DugCmdMsg('2','7','a'); // version number day is 
 	
     TMR1_StartTimer();	// start 50ms counter
     
