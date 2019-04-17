@@ -337,7 +337,7 @@ void main(void)
 	DugCmdMsg('V','0','3'); // version number month is 
 
 	
-	DugCmdMsg('2','7','c'); // version number day is // test 0416 for gitHub
+	DugCmdMsg('2','7','d'); // version number day is // test 0417 for hex file
 	
     TMR1_StartTimer();	// start 50ms counter
     
